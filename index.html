@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BMI Calculator (Your Logic)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+    }
+    .container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>BMI Calculator</h2>
+
+  <label for="weight">Enter Weight:</label>
+  <input type="number" id="weight" placeholder="Enter weight">
+
+  <label for="unit">Weight Unit:</label>
+  <select id="unit">
+    <option value="kilograms">kilograms</option>
+    <option value="grams">grams</option>
+    <option value="stones">stones</option>
+    <option value="pounds">pounds</option>
+  </select>
+
+  <label for="height-unit">Height Unit:</label>
+  <select id="height-unit" onchange="toggleHeightInputs()">
+    <option value="feet_and_inches">feet_and_inches</option>
+    <option value="inches">inches</option>
+    <option value="centimeters">centimeters</option>
+    <option value="meters">meters</option>
+  </select>
+
+  <div id="feet-inches-inputs">
+    <label>Feet:</label>
+    <input type="number" id="feet">
+    <label>Inches:</label>
+    <input type="number" id="inches">
+  </div>
+
+  <div id="other-height-input" style="display:none;">
+    <label for="height">Enter Height:</label>
+    <input type="number" id="height" placeholder="Enter height">
+  </div>
+
+  <button onclick="calculateBMI()">Calculate BMI</button>
+  <div id="result"></div>
+</div>
+
+<script>
+  function convertToKilograms(weight, unit) {
+    if (unit === "grams") {
+      return weight / 1000;
+    } else if (unit === "pounds") {
+      return weight / 2.205;
+    } else if (unit === "stones") {
+      return weight * 6.35029;
+    }
+    return weight;
+  }
+
+  function convertFeetAndInchesToMeters(feet, inches) {
+    return (((feet * 12) + inches) * 2.54) / 100;
+  }
+
+  function convertOtherToMeters(height, unit) {
+    if (unit === "inches") return height * 0.0254;
+    if (unit === "centimeters") return height / 100;
+    return height; // meters
+  }
+
+  function calculateBMI() {
+    const weightInput = parseFloat(document.getElementById('weight').value);
+    const weightUnit = document.getElementById('unit').value;
+    const heightUnit = document.getElementById('height-unit').value;
+
+    let heightMeters = 0;
+
+    if (heightUnit === "feet_and_inches") {
+      const feet = parseFloat(document.getElementById('feet').value);
+      const inches = parseFloat(document.getElementById('inches').value);
+      if (isNaN(feet) || isNaN(inches)) {
+        document.getElementById('result').innerText = "Please enter valid feet and inches.";
+        return;
+      }
+      heightMeters = convertFeetAndInchesToMeters(feet, inches);
+    } else {
+      const height = parseFloat(document.getElementById('height').value);
+      if (isNaN(height)) {
+        document.getElementById('result').innerText = "Please enter a valid height.";
+        return;
+      }
+      heightMeters = convertOtherToMeters(height, heightUnit);
+    }
+
+    if (isNaN(weightInput) || weightInput <= 0 || heightMeters <= 0) {
+      document.getElementById('result').innerText = "Please enter valid weight and height.";
+      return;
+    }
+
+    const weightKg = convertToKilograms(weightInput, weightUnit);
+    const bmi = weightKg / (heightMeters * heightMeters);
+    let category = "";
+
+    if (bmi < 18.5) category = "Underweight";
+    else if (bmi <= 24.9) category = "Normal weight";
+    else if (bmi <= 29.9) category = "Overweight";
+    else if (bmi <= 34.9) category = "Obesity (Class 1)";
+    else if (bmi <= 39.9) category = "Obesity (Class 2)";
+    else category = "Obesity (Class 3)";
+
+    document.getElementById('result').innerText =
+      `Your BMI is ${bmi.toFixed(2)} (${category})`;
+  }
+
+  function toggleHeightInputs() {
+    const unit = document.getElementById('height-unit').value;
+    document.getElementById('feet-inches-inputs').style.display = (unit === 'feet_and_inches') ? 'block' : 'none';
+    document.getElementById('other-height-input').style.display = (unit === 'feet_and_inches') ? 'none' : 'block';
+  }
+</script>
+</body>
+</html>
